@@ -5,8 +5,6 @@ import (
 	"github.com/miekg/dns"
 	"net"
 	g "github.com/grt1st/dnsgo/global"
-	"github.com/boltdb/bolt"
-	"log"
 )
 
 
@@ -29,7 +27,7 @@ func getRecord(domain string, rType uint16) (dns.RR, error) {
 	return rA, nil
 }
 
-
+/*
 func deleteRecord(domain string, rtype uint16) (err error) {
 	key, _ := getKey(domain, rtype)
 	err = bdb.Update(func(tx *bolt.Tx) error {
@@ -48,3 +46,4 @@ func deleteRecord(domain string, rtype uint16) (err error) {
 
 	return err
 }
+*/

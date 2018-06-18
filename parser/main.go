@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/miekg/dns"
 	"log"
-	"net"
 )
 
 func ParseQuery(msg *dns.Msg) {
@@ -22,7 +21,7 @@ func ParseQuery(msg *dns.Msg) {
 		}
 	}
 }
-
+/*
 func ParseUpdate(r dns.RR, g *dns.Question) {
 	var (
 		rr    dns.RR
@@ -76,3 +75,4 @@ func ParseUpdate(r dns.RR, g *dns.Question) {
 		}
 	}
 }
+*/
