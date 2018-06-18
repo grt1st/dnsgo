@@ -31,11 +31,11 @@ func (this *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		parser.ParseQuery(msg)
 	case dns.OpcodeUpdate:
 		fmt.Println("update")
-		for _, question := range r.Question {
+		/*for _, question := range r.Question {
 			for _, rr := range r.Ns {
 				parser.ParseUpdate(rr, &question)
 			}
-		}
+		}*/
 	}
 
 	w.WriteMsg(msg)
