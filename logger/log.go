@@ -41,7 +41,7 @@ func NewLogger() *Logger {
 	return logger
 }
 
-func (l *Logger) SetLogger(handlerType string, config map[string]interface{}) {
+func (l *Logger) SetLogger(handlerType string, config map[string]interface{}) error {
 	var handler LoggerHandler
 	switch handlerType {
 	case "console":
@@ -52,8 +52,9 @@ func (l *Logger) SetLogger(handlerType string, config map[string]interface{}) {
 		panic("Unknown log handler.")
 	}
 
-	handler.Setup(config)
+	err := handler.Setup(config)
 	l.outputs[handlerType] = handler
+	return err
 }
 
 func (l *Logger) SetLevel(level int) {

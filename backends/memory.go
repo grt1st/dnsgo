@@ -1,14 +1,18 @@
 package backends
 
-import "sync"
+import (
+	"sync"
+)
 
 type Memory struct {
 	Saver map[string]Record
 	sync.RWMutex
 }
 
-func (m *Memory) Init() error {
-	return nil
+func NewMemory() (*Memory, error){
+	return &Memory{
+		Saver: map[string]Record{},
+	}, nil
 }
 
 func (m *Memory) getValue() error {

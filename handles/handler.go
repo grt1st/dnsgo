@@ -16,21 +16,32 @@ const (
 )
 
 type Handler struct {
-	Hosts  Host
+	Hosts  *Host
 	Cache  backends.Backend
-	Resolv Resolver
-	Logger logger.ConsoleHandler
+	Resolv *Resolver
+	Logger *logger.Logger
+	QueryFlag bool
 }
 
-func NewHandler() *Handler {
+func NewHandler(queryFlag bool, logfile string) *Handler {
 	h := Handler{}
-	h.Cache = &backends.Memory{
-		Saver: map[string]backends.Record{},
+	h.Cache,_ = backends.NewMemory()
+	h.Hosts = NewHost("hosts.conf")
+	h.Resolv = NewResolver()
+	h.Logger = logger.NewLogger()
+	err := h.Logger.SetLogger("console", nil)
+	if err != nil {
+		log.Fatalln(err)
 	}
-	h.Cache.Init()
-	h.Hosts = *NewHost("hosts.conf")
-	h.Resolv = *NewResolver()
-
+	if logfile != "" {
+		config := map[string]interface{}{"file": logfile}
+		err = h.Logger.SetLogger("file", config)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	h.Logger.SetLevel(-1)
+	h.QueryFlag = queryFlag
 	return &h
 }
 
@@ -91,18 +102,23 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				}
 			}
 
-			log.Println("hosts", remoteIp, q.Name, ips, len(m.Answer))
+			h.Logger.Info("hosts", remoteIp, q.Name, ips, len(m.Answer))
 
 			w.WriteMsg(m)
 			return
 		}
 	}
 
+	if h.QueryFlag == false {
+		dns.HandleFailed(w, req)
+		return
+	}
+
 	// 取出cache
 	if rec, ok := h.Cache.GetRecord(q.Name); ok {
 		m := rec.Mesg
 		m.Id = req.Id
-		log.Println("cache", remoteIp, q.Name, len(m.Answer))
+		h.Logger.Info("cache", remoteIp, q.Name, len(m.Answer))
 		w.WriteMsg(m)
 		return
 	}
@@ -110,11 +126,12 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	mesg, err := h.Resolv.Lookup(Net, req)
 
 	if err != nil {
+		h.Logger.Error(err.Error())
 		dns.HandleFailed(w, req)
 		return
 	}
 
-	log.Println("lookup", remoteIp, q.Name, len(mesg.Answer))
+	h.Logger.Info("lookup", remoteIp, q.Name, len(mesg.Answer))
 
 	// 保存cache
 	h.Cache.SaveRecord(backends.Record{
@@ -123,11 +140,6 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		Mesg: mesg,
 	})
 	w.WriteMsg(mesg)
-
-	/*
-		if IPQuery > 0 && len(mesg.Answer) > 0 {
-			err = h.Cache.SaveRecord(Net, mesg.Answer[0].Header(A))
-		}*/
 
 }
 

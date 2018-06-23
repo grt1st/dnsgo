@@ -20,8 +20,8 @@ func (s *Server) Addr() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
-func (s *Server) Run() {
-	Handler := handles.NewHandler()
+func (s *Server) Run(queryFlag bool, logfile string) {
+	Handler := handles.NewHandler(queryFlag, logfile)
 
 	tcpHandler := dns.NewServeMux()
 	tcpHandler.HandleFunc(".", Handler.DoTCP)

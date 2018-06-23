@@ -12,7 +12,7 @@ type Record struct {
 }
 
 type Backend interface {
-	Init() error
+	//Init() (*Backend, error)
 	getValue() error
 	DeleteRecord(record Record) error
 	SaveRecord(record Record) error
