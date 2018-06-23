@@ -15,8 +15,6 @@ type FileChecker struct {
 }
 
 type Settings struct {
-	Host       string
-	Port       int
 	Nameserver string
 	Hosts      string
 	Resolv     string

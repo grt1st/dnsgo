@@ -7,7 +7,15 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
+
+const (
+	HOST = 600
+	REBIND = 0
+)
+
+var ModTime time.Time
 
 type Host struct {
 	domain map[string]string
@@ -54,6 +62,9 @@ func (h *Host) InitHosts(filename string) {
 
 		h.Set(sli[0], sli[1])
 	}
+
+	fileInfo, _ := os.Stat("./conf/" + filename)
+	ModTime = fileInfo.ModTime()
 }
 
 func (h *Host) Get(name string) (string, bool) {
@@ -76,7 +87,13 @@ func (h *Host) Delete(name string) {
 }
 
 func (h *Host) Refresh(filename string) {
+	fileInfo, _ := os.Stat("./conf/" + filename)
+	NowTime := fileInfo.ModTime()
 
+	if NowTime.After(ModTime){
+		newH := NewHost(filename)
+		h.domain = newH.domain
+	}
 }
 
 func ParserUrl(domain, ip string) ([]string, bool) {
@@ -142,4 +159,11 @@ func (c *Counter) Get(domain string) int {
 		return count
 	}
 	return 1
+}
+
+func (c *Counter) Has(domain string) bool {
+	c.Lock()
+	defer c.Unlock()
+	_, ok := c.mapCount[domain]
+	return ok
 }

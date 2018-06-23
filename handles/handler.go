@@ -77,13 +77,18 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			m := new(dns.Msg)
 			m.SetReply(req)
 
+			ttl := 600
+			if R.Has(q.Name) {
+				ttl = 0
+			}
+
 			switch IPQuery {
 			case _IP4Query:
 				rr_header := dns.RR_Header{
 					Name:   q.Name,
 					Rrtype: dns.TypeA,
 					Class:  dns.ClassINET,
-					Ttl:    600,
+					Ttl:   uint32(ttl),
 				}
 				for _, ip := range ips {
 					a := &dns.A{rr_header, net.ParseIP(ip).To4()}
@@ -94,7 +99,7 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 					Name:   q.Name,
 					Rrtype: dns.TypeAAAA,
 					Class:  dns.ClassINET,
-					Ttl:    600,
+					Ttl:    uint32(ttl),
 				}
 				for _, ip := range ips {
 					aaaa := &dns.AAAA{rr_header, net.ParseIP(ip).To16()}
