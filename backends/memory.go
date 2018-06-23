@@ -3,55 +3,50 @@ package backends
 import "sync"
 
 type Memory struct {
-	Saver map[string]string
-	//Rtype dns.Type
-	//Class dns.Class
-	//Ttl int
+	Saver map[string]Record
 	sync.RWMutex
 }
 
-func (m *Memory) Init() (error) {
-	m.Saver = map[string]string{
-		"google.com.": "1.2.3.4",
-		"ja.com.":     "104.198.14.52",
-		"grt1st.cn.":  "123.206.60.140",
-	}
+func (m *Memory) Init() error {
 	return nil
 }
 
-func (m *Memory) getValue() (error) {
+func (m *Memory) getValue() error {
 	//value, ok := m.Saver[domain]
 	return nil
 }
 
-func (m *Memory) DeleteRecord(domain string) (error){
+func (m *Memory) DeleteRecord(record Record) error {
 	m.Lock()
 	defer m.Unlock()
-	delete(m.Saver, domain)
+	delete(m.Saver, record.Name)
 	return nil
 }
 
-func (m *Memory) SaveRecord(domain, address string) (error) {
+func (m *Memory) SaveRecord(record Record) error {
 	m.Lock()
 	defer m.Unlock()
-	m.Saver[domain] = address
+	m.Saver[record.Name] = record
 	return nil
 }
 
-func (m *Memory) GetRecord(domain string) (string, bool) {
+func (m *Memory) GetRecord(name string) (Record, bool) {
 	m.Lock()
 	defer m.Unlock()
-	address, ok := m.Saver[domain]
-	return address, ok
+	rec, ok := m.Saver[name]
+	if ok && rec.Valid() {
+		return rec, true
+	}
+	return Record{}, false
 }
 
-func (m *Memory) UpdateRecord(domain, address string) (error) {
+func (m *Memory) UpdateRecord(record Record) error {
 	m.Lock()
 	defer m.Unlock()
-	m.Saver["domain"] = address
+	m.Saver[record.Name] = record
 	return nil
 }
 
-func (m *Memory) Close() (error) {
+func (m *Memory) Close() error {
 	return nil
 }
