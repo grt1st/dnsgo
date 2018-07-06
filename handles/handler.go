@@ -107,6 +107,13 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				}
 			}
 
+			/*m.Extra = append(m.Extra, &dns.A{
+				dns.RR_Header{
+
+				},
+				net.ParseIP("127.0.0.1").To4(),
+			})*/
+
 			h.Logger.Info("hosts", remoteIp, q.Name, ips, len(m.Answer))
 
 			w.WriteMsg(m)

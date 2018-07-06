@@ -79,9 +79,23 @@ Basic use: `./dnsgo -host 0.0.0.0`, you can test it by `dig @127.0.0.1 xxxx.xx`
 
 To use it on the internet, first, you have to add a nameserver record for it. Config it at the domain name resolution page.
 
-![set_ns](http://view.grt1st.cn/img/dnsgo1.png)
+Config subdomain like this:
+```
+dnsgo NS ns.dnsgo.your-domain
+ns.dnsgo A your-ip
+```
 
-My config is not effective, so to be continued.
+Then you can config host at `conf/hosts.conf`, like:
+```
+test.dnsgo.your-domain. 8.8.8.8
+```
+
+To do dns rebinding, do this:
+```
+rebind.dnsgo.your-domain. 8.8.8.8|127.0.0.1
+```
+
+However, it depends on the dns server, for example some servers min-ttl is 60.
 
 ## To-do 
 
