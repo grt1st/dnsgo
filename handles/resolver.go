@@ -15,7 +15,10 @@ type Resolver struct {
 }
 
 func NewResolver() *Resolver {
-	r := Resolver{NameServers: []string{}, Forward: map[string]string{}}
+	r := Resolver{
+		NameServers: []string{},
+		Forward: map[string]string{},
+	}
 	r.initNameserver()
 	r.initResolver()
 	return &r

@@ -42,6 +42,7 @@ func (s *Server) Run(queryFlag bool, logfile string) {
 		ReadTimeout:  s.RTimeout,
 		WriteTimeout: s.WTimeout}
 
+	log.Println("[+] dns server start listening at", s.Addr())
 	s.start(udpServer)
 	s.start(tcpServer)
 

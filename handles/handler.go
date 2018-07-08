@@ -6,7 +6,6 @@ import (
 	"github.com/miekg/dns"
 	"log"
 	"net"
-	"strings"
 )
 
 const (
@@ -60,11 +59,6 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	if IPQuery > 0 {
 
 		ip, ok := h.Hosts.Get(q.Name)
-		if ok == false {
-			// 尝试匹配通配符
-			slt := strings.Split(q.Name, ".")
-			ip, ok = h.Hosts.Get("*." + strings.Join(slt[1:], "."))
-		}
 
 		var ips []string
 		var flag bool

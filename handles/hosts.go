@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/miekg/dns"
 )
 
 const (
@@ -18,13 +19,13 @@ const (
 var ModTime time.Time
 
 type Host struct {
-	domain map[string]string
+	domain *suffixTreeNode
 	sync.RWMutex
 }
 
 func NewHost(filename string) *Host {
 	h := Host{
-		domain: map[string]string{},
+		domain: newSuffixTreeRoot(),
 	}
 	h.InitHosts(filename)
 	return &h
@@ -67,23 +68,28 @@ func (h *Host) InitHosts(filename string) {
 	ModTime = fileInfo.ModTime()
 }
 
-func (h *Host) Get(name string) (string, bool) {
+func (h *Host) Get(qname string) (string, bool) {
 	h.Lock()
 	defer h.Unlock()
-	url, ok := h.domain[name]
-	return url, ok
+	queryKeys := strings.Split(qname, ".")
+	queryKeys = queryKeys[:len(queryKeys)-1]
+	key, ok := h.domain.searchWidcard(queryKeys)
+	return key, ok
 }
 
-func (h *Host) Set(name, url string) {
+func (h *Host) Set(domain, ip string) {
 	h.Lock()
 	defer h.Unlock()
-	h.domain[name] = url
+	domain = UnFqdn(domain)
+	h.domain.sinsert(strings.Split(domain, "."), ip)
 }
 
-func (h *Host) Delete(name string) {
+func (h *Host) Delete(qname string) {
 	h.Lock()
 	h.Unlock()
-	delete(h.domain, name)
+	queryKeys := strings.Split(qname, ".")
+	queryKeys = queryKeys[:len(queryKeys)-1]
+	h.domain.delete(queryKeys)
 }
 
 func (h *Host) Refresh(filename string) {
@@ -166,4 +172,32 @@ func (c *Counter) Has(domain string) bool {
 	defer c.Unlock()
 	_, ok := c.mapCount[domain]
 	return ok
+}
+
+func UnFqdn(s string) string {
+	if dns.IsFqdn(s) {
+		return s[:len(s)-1]
+	}
+	return s
+}
+
+func (node *suffixTreeNode) searchWidcard(keys []string) (string, bool) {
+
+	if len(keys) == 0 {
+		return "", false
+	}
+
+	key := keys[len(keys)-1]
+	n, ok := node.children[key]
+	if ok == false {
+		n, ok = node.children["*"]
+	}
+	if ok {
+		if nextValue, found := n.searchWidcard(keys[:len(keys)-1]); found {
+			return nextValue, found
+		}
+		return n.value, (n.value != "")
+	}
+
+	return "", false
 }
