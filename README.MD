@@ -66,13 +66,14 @@ Also you can define a log file, such as: `./dnsgo.go -log "./dnsgo.log"`
      And, you can use wildcard in it, such as `*.github.com. 192.168.1.1`
      
      Pattern:
+     
      | Pattern | Meaning |
-     | - | :-: |
+     | ------------- | ------------- |
      | `github.com. 127.0.0.0.1`| A record to `github.com`, value: `127.0.0.1`|
-     | `github.com. 127.0.0.0.1&1.2.3.4` | A record to `github.com`, value: `127.0.0.1` & `1.2.3.4` |
+     |`github.com. 127.0.0.0.1&1.2.3.4` | A record to `github.com`, value: `127.0.0.1` & `1.2.3.4` |
      | `a.github.com. 127.0.0.0.1` | Define a subdomain `a.github.com` with A record |
      | `*.github.com. 127.0.0.0.1` | Define a subdomain of wildcard. Priority is lower than the specified subdomain. |
-     | `github.com. 127.0.0.0.1|1.2.3.4` | dns-rebinding. A record to `github.com`, Odd requests return first one(`127.0.0.1`), while even requests return the second(`1.2.3.4`). |
+     | `github.com. 127.0.0.0.1\|1.2.3.4` | dns-rebinding. A record to `github.com`, Odd requests return first one(`127.0.0.1`), while even requests return the second(`1.2.3.4`). |
      
      
 - nameserver.conf
