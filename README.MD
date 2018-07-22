@@ -137,10 +137,8 @@ dig `whoami`.your-domain
 
 ## To-do 
 
-1. Dynamic update hosts
-2. More stability test
-3. Code rebuild
-4. Fix ns lookup read timeout bug
+1. More stability test
+2. Code rebuild
 
 ## Thanks
 

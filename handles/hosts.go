@@ -28,6 +28,9 @@ func NewHost(filename string) *Host {
 		domain: newSuffixTreeRoot(),
 	}
 	h.InitHosts(filename)
+	fileInfo, _ := os.Stat("./conf/" + filename)
+	ModTime = fileInfo.ModTime()
+	go h.CheckUpdate(filename)
 	return &h
 }
 
@@ -63,9 +66,6 @@ func (h *Host) InitHosts(filename string) {
 
 		h.Set(sli[0], sli[1])
 	}
-
-	fileInfo, _ := os.Stat("./conf/" + filename)
-	ModTime = fileInfo.ModTime()
 }
 
 func (h *Host) Get(qname string) (string, bool) {
@@ -200,4 +200,27 @@ func (node *suffixTreeNode) searchWidcard(keys []string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func (h *Host) CheckUpdate(filename string) {
+	for {
+		time.Sleep(2 * time.Second)
+		fileInfo, err := os.Stat("./conf/" + filename)
+		if err != nil {
+			log.Println(err, ModTime)
+			continue
+		}
+		//fmt.Println(fileInfo)
+		NowTime := fileInfo.ModTime()
+		if NowTime != ModTime {
+			ModTime = NowTime
+			nh := Host{
+				domain: newSuffixTreeRoot(),
+			}
+			nh.InitHosts(filename)
+			h.Lock()
+			h.domain = nh.domain
+			h.Unlock()
+		}
+	}
 }
