@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/miekg/dns"
 )
 
@@ -16,7 +17,10 @@ const (
 	REBIND = 0
 )
 
-var ModTime time.Time
+var (
+	ModTime time.Time
+	NSMap sync.Map
+)
 
 type Host struct {
 	domain *suffixTreeNode
@@ -49,22 +53,53 @@ func (h *Host) InitHosts(filename string) {
 			continue
 		}
 
-		// pattern： sli[0] domain; sli[1 ip
+		// pattern： sli[0] domain; sli[1] ip
+		var domain, value string
 		sli := strings.Split(line, " ")
-		if len(sli) != 2 {
-			continue
+		if len(sli) == 2 || (len(sli) == 3 && (sli[1] == "A" || sli[1] == "AAAA")) {
+			/*
+				domain1 1.2.3.4
+				domain2 A 1.2.3.4
+			*/
+			if len(sli) == 2 {
+				domain = sli[0]
+				value = sli[1]
+			} else {
+				domain = sli[0]
+				value = sli[2]
+			}
+			// 验证domain、ip
+			if IsUsefulIp(value) == false {
+				continue
+			}
+			// dns rebinding
+			if len(strings.Split(value, "|")) == 2 {
+				R.Create(domain)
+			}
+		} else {
+			/*
+			domain3 TXT "hello"
+			domain4 NS ns.domain
+			 */
+			if len(sli) != 3 {
+				continue
+			}
+			switch sli[1] {
+			case "TXT":
+				domain = sli[0]
+				value = sli[2]
+			case "NS":
+				domain = sli[0]
+				value = sli[2]
+				NSMap.Store(domain, value)
+				continue
+			default:
+				// not support yet
+				continue
+			}
 		}
 
-		// 验证domain、ip
-		if IsUsefulIp(sli[1]) == false {
-			continue
-		}
-
-		if len(strings.Split(sli[1], "|")) == 2 {
-			R.Create(sli[0])
-		}
-
-		h.Set(sli[0], sli[1])
+		h.Set(domain, value)
 	}
 }
 

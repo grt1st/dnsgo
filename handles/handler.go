@@ -1,30 +1,36 @@
 package handles
 
 import (
-	"github.com/grt1st/dnsgo/backends"
-	"github.com/grt1st/dnsgo/logger"
-	"github.com/miekg/dns"
+	"fmt"
 	"log"
 	"net"
+	"strings"
+
+	"github.com/miekg/dns"
+
+	"github.com/grt1st/dnsgo/backends"
+	"github.com/grt1st/dnsgo/logger"
 )
 
 const (
-	notIPQuery = 0
-	_IP4Query  = 4
-	_IP6Query  = 6
+	notIPQuery = iota
+	_IP4Query
+	_IP6Query
+	_TXTQuery
+	_NSQuery
 )
 
 type Handler struct {
-	Hosts  *Host
-	Cache  backends.Backend
-	Resolv *Resolver
-	Logger *logger.Logger
+	Hosts     *Host
+	Cache     backends.Backend
+	Resolv    *Resolver
+	Logger    *logger.Logger
 	QueryFlag bool
 }
 
 func NewHandler(queryFlag bool, logfile string) *Handler {
 	h := Handler{}
-	h.Cache,_ = backends.NewMemory()
+	h.Cache, _ = backends.NewMemory()
 	h.Hosts = NewHost("hosts.conf")
 	h.Resolv = NewResolver()
 	h.Logger = logger.NewLogger()
@@ -58,12 +64,28 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 
 	if IPQuery > 0 {
 
-		ip, ok := h.Hosts.Get(q.Name)
+		var ip string
+		var ok bool
+		if IPQuery == _NSQuery {
+			queryKeys := strings.Split(q.Name, ".")
+			queryKeys = queryKeys[:len(queryKeys)-1]
+			var value interface{}
+			value, ok = NSMap.Load(strings.Join(queryKeys, "."))
+			if ok {
+				ip = value.(string)
+			}
+		} else {
+			ip, ok = h.Hosts.Get(q.Name)
+		}
 
 		var ips []string
 		var flag bool
 		if ok {
 			ips, flag = ParserUrl(q.Name, ip)
+		}
+		if IPQuery == _TXTQuery || IPQuery == _NSQuery {
+			flag = true
+			ips = []string{ip}
 		}
 
 		if ok && flag {
@@ -82,7 +104,7 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 					Name:   q.Name,
 					Rrtype: dns.TypeA,
 					Class:  dns.ClassINET,
-					Ttl:   uint32(ttl),
+					Ttl:    uint32(ttl),
 				}
 				for _, ip := range ips {
 					a := &dns.A{rr_header, net.ParseIP(ip).To4()}
@@ -99,6 +121,27 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 					aaaa := &dns.AAAA{rr_header, net.ParseIP(ip).To16()}
 					m.Answer = append(m.Answer, aaaa)
 				}
+			case _TXTQuery:
+				rr_header := dns.RR_Header{
+					Name:   q.Name,
+					Rrtype: dns.TypeTXT,
+					Class:  dns.ClassINET,
+					Ttl:    uint32(ttl),
+				}
+				txt := &dns.TXT{rr_header, ips}
+				m.Answer = append(m.Answer, txt)
+			case _NSQuery:
+				rr_header := dns.RR_Header{
+					Name:   q.Name,
+					Rrtype: dns.TypeNS,
+					Class:  dns.ClassINET,
+					Ttl:    uint32(38609),
+				}
+				for _, ip := range ips {
+					fmt.Printf("%+v, %v\n", rr_header, ip)
+					ns := &dns.NS{rr_header, ip}
+					m.Answer = append(m.Answer, ns)
+				}
 			}
 
 			/*m.Extra = append(m.Extra, &dns.A{
@@ -108,11 +151,19 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				net.ParseIP("127.0.0.1").To4(),
 			})*/
 
-			h.Logger.Info("hosts", remoteIp, q.Name, ips, len(m.Answer))
+			fmt.Printf("%+v\n", m.Answer)
 
-			w.WriteMsg(m)
+			h.Logger.Info("response, kind=%v, remote=%v, qname=%v, result=%v, len=%v",
+				IPQuery, remoteIp, q.Name, ips, len(m.Answer))
+
+			err := w.WriteMsg(m)
+			if err != nil {
+				h.Logger.Error("response err: %v", err)
+			}
 			return
 		}
+	} else {
+		h.Logger.Warn("unknown query type: %+v", q.Qtype)
 	}
 
 	if h.QueryFlag == false {
@@ -167,6 +218,10 @@ func (h *Handler) isIPQuery(q dns.Question) int {
 		return _IP4Query
 	case dns.TypeAAAA:
 		return _IP6Query
+	case dns.TypeNS:
+		return _NSQuery
+	case dns.TypeTXT:
+		return _TXTQuery
 	default:
 		return notIPQuery
 	}
