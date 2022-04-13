@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/grt1st/dnsgo/server"
-	"time"
 	"flag"
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/grt1st/dnsgo/handles"
+	"github.com/grt1st/dnsgo/service"
 )
 
 const versionNumber = "1.0.1#20180623"
@@ -35,7 +37,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	server := &server.Server{
+	service.Init("./conf/default.conf")
+	server := &handles.Server{
 		Host:     *host,
 		Port:     53,
 		RTimeout: 5 * time.Second,

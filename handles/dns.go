@@ -10,6 +10,7 @@ import (
 
 	"github.com/grt1st/dnsgo/backends"
 	"github.com/grt1st/dnsgo/logger"
+	"github.com/grt1st/dnsgo/service"
 )
 
 const (
@@ -21,9 +22,9 @@ const (
 )
 
 type Handler struct {
-	Hosts     *Host
-	Cache     backends.Backend
-	Resolv    *Resolver
+	Hosts     *service.Host
+	Cache     *backends.Memory
+	Resolv    *service.Resolver
 	Logger    *logger.Logger
 	QueryFlag bool
 }
@@ -31,8 +32,8 @@ type Handler struct {
 func NewHandler(queryFlag bool, logfile string) *Handler {
 	h := Handler{}
 	h.Cache, _ = backends.NewMemory()
-	h.Hosts = NewHost("hosts.conf")
-	h.Resolv = NewResolver()
+	h.Hosts = service.NewHost(service.Config.FilePath + service.Config.Hosts)
+	h.Resolv = service.NewResolver(service.Config.FilePath+service.Config.Nameserver, service.Config.FilePath+service.Config.Resolv)
 	h.Logger = logger.NewLogger()
 	err := h.Logger.SetLogger("console", nil)
 	if err != nil {
@@ -50,6 +51,7 @@ func NewHandler(queryFlag bool, logfile string) *Handler {
 	return &h
 }
 
+// 处理 dns 请求
 func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	q := req.Question[0]
 
@@ -70,7 +72,7 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			queryKeys := strings.Split(q.Name, ".")
 			queryKeys = queryKeys[:len(queryKeys)-1]
 			var value interface{}
-			value, ok = NSMap.Load(strings.Join(queryKeys, "."))
+			value, ok = service.NSMap.Load(strings.Join(queryKeys, "."))
 			if ok {
 				ip = value.(string)
 			}
@@ -94,7 +96,7 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			m.SetReply(req)
 
 			ttl := 600
-			if R.Has(q.Name) {
+			if service.R.Has(q.Name) {
 				ttl = 0
 			}
 
@@ -166,6 +168,7 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		h.Logger.Warn("unknown query type: %+v", q.Qtype)
 	}
 
+	// 如果不支持查询其他dns服务器，退出
 	if h.QueryFlag == false {
 		dns.HandleFailed(w, req)
 		return
@@ -181,13 +184,11 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	}
 
 	mesg, err := h.Resolv.Lookup(Net, req)
-
 	if err != nil {
 		h.Logger.Error(err.Error())
 		dns.HandleFailed(w, req)
 		return
 	}
-
 	h.Logger.Info("lookup", remoteIp, q.Name, len(mesg.Answer))
 
 	// 保存cache
@@ -197,7 +198,6 @@ func (h *Handler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		Mesg: mesg,
 	})
 	w.WriteMsg(mesg)
-
 }
 
 func (h *Handler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {

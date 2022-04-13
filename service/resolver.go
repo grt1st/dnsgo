@@ -1,12 +1,13 @@
-package handles
+package service
 
 import (
-	"github.com/miekg/dns"
 	"log"
 	"net"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
 type Resolver struct {
@@ -14,13 +15,13 @@ type Resolver struct {
 	Forward     map[string]string
 }
 
-func NewResolver() *Resolver {
+func NewResolver(nameserverFileName, resolverFilename  string) *Resolver {
 	r := Resolver{
 		NameServers: []string{},
-		Forward: map[string]string{},
+		Forward:     map[string]string{},
 	}
-	r.initNameserver()
-	r.initResolver()
+	r.initNameserver(nameserverFileName)
+	r.initResolver(resolverFilename)
 	return &r
 }
 
@@ -54,7 +55,6 @@ func (r *Resolver) Lookup(net string, req *dns.Msg) (message *dns.Msg, err error
 	ticker := time.NewTicker(time.Duration(200) * time.Millisecond)
 	defer ticker.Stop()
 
-	defer ticker.Stop()
 	// Start lookup on each nameserver top-down, in every second
 	NameServers := r.GetNameServers(qname)
 	for _, nameserver := range NameServers {
@@ -76,7 +76,6 @@ func (r *Resolver) Lookup(net string, req *dns.Msg) (message *dns.Msg, err error
 	default:
 		return nil, nil
 	}
-
 }
 
 func (r *Resolver) GetNameServers(qname string) []string {

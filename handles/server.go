@@ -1,12 +1,12 @@
-package server
+package handles
 
 import (
-	"github.com/grt1st/dnsgo/handles"
-	"github.com/miekg/dns"
 	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
 type Server struct {
@@ -21,13 +21,13 @@ func (s *Server) Addr() string {
 }
 
 func (s *Server) Run(queryFlag bool, logfile string) {
-	Handler := handles.NewHandler(queryFlag, logfile)
+	handler := NewHandler(queryFlag, logfile)
 
 	tcpHandler := dns.NewServeMux()
-	tcpHandler.HandleFunc(".", Handler.DoTCP)
+	tcpHandler.HandleFunc(".", handler.DoTCP)
 
 	udpHandler := dns.NewServeMux()
-	udpHandler.HandleFunc(".", Handler.DoUDP)
+	udpHandler.HandleFunc(".", handler.DoUDP)
 
 	tcpServer := &dns.Server{Addr: s.Addr(),
 		Net:          "tcp",

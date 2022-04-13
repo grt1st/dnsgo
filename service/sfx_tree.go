@@ -1,4 +1,4 @@
-package handles
+package service
 
 type suffixTreeNode struct {
 	key      string
@@ -6,11 +6,11 @@ type suffixTreeNode struct {
 	children map[string]*suffixTreeNode
 }
 
-func newSuffixTreeRoot() *suffixTreeNode {
-	return newSuffixTree("", "")
+func NewSuffixTreeRoot() *suffixTreeNode {
+	return NewSuffixTree("", "")
 }
 
-func newSuffixTree(key string, value string) *suffixTreeNode {
+func NewSuffixTree(key string, value string) *suffixTreeNode {
 	root := &suffixTreeNode{
 		key:      key,
 		value:    value,
@@ -21,7 +21,7 @@ func newSuffixTree(key string, value string) *suffixTreeNode {
 
 func (node *suffixTreeNode) ensureSubTree(key string) {
 	if _, ok := node.children[key]; !ok {
-		node.children[key] = newSuffixTree(key, "")
+		node.children[key] = NewSuffixTree(key, "")
 	}
 }
 
@@ -29,7 +29,7 @@ func (node *suffixTreeNode) insert(key string, value string) {
 	if c, ok := node.children[key]; ok {
 		c.value = value
 	} else {
-		node.children[key] = newSuffixTree(key, value)
+		node.children[key] = NewSuffixTree(key, value)
 	}
 }
 
@@ -78,4 +78,25 @@ func (node *suffixTreeNode) delete(keys []string) {
 	}
 
 	node.value = ""
+}
+
+func (node *suffixTreeNode) searchWidcard(keys []string) (string, bool) {
+
+	if len(keys) == 0 {
+		return "", false
+	}
+
+	key := keys[len(keys)-1]
+	n, ok := node.children[key]
+	if ok == false {
+		n, ok = node.children["*"]
+	}
+	if ok {
+		if nextValue, found := n.searchWidcard(keys[:len(keys)-1]); found {
+			return nextValue, found
+		}
+		return n.value, n.value != ""
+	}
+
+	return "", false
 }

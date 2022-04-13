@@ -9,7 +9,7 @@ type Memory struct {
 	sync.RWMutex
 }
 
-func NewMemory() (*Memory, error){
+func NewMemory() (*Memory, error) {
 	return &Memory{
 		Saver: map[string]Record{},
 	}, nil

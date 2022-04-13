@@ -1,24 +1,15 @@
 package backends
 
 import (
-	"github.com/miekg/dns"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
 type Record struct {
-	Name string
-	Ttl  time.Time
-	Mesg *dns.Msg
-}
-
-type Backend interface {
-	//Init() (*Backend, error)
-	getValue() error
-	DeleteRecord(record Record) error
-	SaveRecord(record Record) error
-	GetRecord(name string) (Record, bool)
-	UpdateRecord(record Record) error
-	Close() error
+	Name string    `json:"name"`
+	Ttl  time.Time `json:"ttl"`
+	Mesg *dns.Msg  `json:"mesg"`
 }
 
 func (r *Record) Valid() bool {
