@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tailwind Starter Template - Minimal Admin Template: Tailwind Toolbox</title>
+    <meta name="description" content="description here">
+    <meta name="keywords" content="keywords,here">
+
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,700,800" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+
+    <style>
+        .nunito {
+            font-family: 'nunito', font-sans;
+        }
+        
+        .border-b-1 {
+            border-bottom-width: 1px;
+        }
+        
+        .border-l-1 {
+            border-left-width: 1px;
+        }
+        
+        hover\:border-none:hover {
+            border-style: none;
+        }
+        
+        #sidebar {
+            transition: ease-in-out all .3s;
+            z-index: 9999;
+        }
+        
+        #sidebar span {
+            opacity: 0;
+            position: absolute;
+            transition: ease-in-out all .1s;
+        }
+        
+        #sidebar:hover {
+            width: 150px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            /*shadow-2xl*/
+        }
+        
+        #sidebar:hover span {
+            opacity: 1;
+        }
+
+        input:disabled {
+            color:#000;
+            background:#F5F5F5;
+            pointer-events:none;
+        }
+
+        textarea:disabled {
+            color:#000;
+            background:#F5F5F5;
+            pointer-events:none;
+        }
+
+        .checked\:right-0:checked {
+            right: 0!important;
+        }
+
+        .checked\:bg-green-500:checked {
+            --tw-bg-opacity: 1!important;
+            background-color: rgba(16,185,129,var(--tw-bg-opacity))!important;
+        }
+    </style>
+
+</head>
+
+<body class="flex h-screen bg-gray-100 font-sans">
+
+    <!-- Side bar-->
+    <div id="sidebar" class="h-screen w-16 menu bg-white text-white px-4 flex items-center nunito static fixed shadow">
+
+        <ul class="list-reset ">
+            <li class="my-2 md:my-0">
+                <a href="#" class="block py-1 md:py-3 pl-1 align-middle text-gray-600 no-underline hover:text-indigo-400">
+                    <i class="fas fa-home fa-fw mr-3"></i><span class="w-full inline-block pb-1 md:pb-0 text-sm">Home</span>
+                </a>
+            </li>
+            <li class="my-2 md:my-0 ">
+                <a href="#" class="block py-1 md:py-3 pl-1 align-middle text-gray-600 no-underline hover:text-indigo-400">
+                    <i class="fa fa-bars fa-fw mr-3"></i><span class="w-full inline-block pb-1 md:pb-0 text-sm">Records</span>
+                </a>
+            </li>
+            <li class="my-2 md:my-0">
+                <a href="#" class="block py-1 md:py-3 pl-1 align-middle text-gray-600 no-underline hover:text-indigo-400">
+                    <i class="fa fa-cog fa-fw mr-3 text-indigo-400"></i><span class="w-full inline-block pb-1 md:pb-0 text-sm">Settings</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+
+    <div class="flex flex-row flex-wrap flex-1 flex-grow content-start pl-16">
+
+        <div class="h-40 lg:h-20 w-full flex flex-wrap">
+            <nav id="header1" class="bg-gray-100 w-auto flex-1 border-b-1 border-gray-300 order-1 lg:order-2">
+
+                <div class="flex h-full justify-between items-center">
+
+                    <!--Search-->
+                    <div class="relative w-full max-w-3xl px-6">
+                        <p class="text-xl">管理后台 - 配置</p>
+                    </div>
+                    <!-- / Search-->
+
+                    <!--Menu-->
+
+                    <div class="flex relative inline-block pr-6">
+
+                        <div class="relative text-sm">
+                            <button id="userButton" class="flex items-center focus:outline-none mr-3">
+                                <img class="w-8 h-8 rounded-full mr-4" src="https://meego.feishu.cn/v1/user/avatar/jintianlu" alt="Avatar of User"> <span class="hidden md:inline-block">Hi, User </span>
+                                <svg class="pl-2 h-2" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 129 129" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 129 129">
+                                    <g>
+                                        <path d="m121.3,34.6c-1.6-1.6-4.2-1.6-5.8,0l-51,51.1-51.1-51.1c-1.6-1.6-4.2-1.6-5.8,0-1.6,1.6-1.6,4.2 0,5.8l53.9,53.9c0.8,0.8 1.8,1.2 2.9,1.2 1,0 2.1-0.4 2.9-1.2l53.9-53.9c1.7-1.6 1.7-4.2 0.1-5.8z"></path>
+                                    </g>
+                                </svg>
+                            </button>
+                            <div id="userMenu" class="bg-white nunito rounded shadow-md mt-2 absolute mt-12 top-0 right-0 min-w-full overflow-auto z-30 invisible">
+                                <ul class="list-reset">
+                                    <!--
+                                    <li><a href="#" class="px-4 py-2 block text-gray-900 hover:bg-indigo-400 hover:text-white no-underline hover:no-underline">My account</a></li>
+                                    <li><a href="#" class="px-4 py-2 block text-gray-900 hover:bg-indigo-400 hover:text-white no-underline hover:no-underline">Notifications</a></li>
+                                    <li>
+                                        <hr class="border-t mx-2 border-gray-400">
+                                    </li>
+                                    -->
+                                    <li><a href="#" class="px-4 py-2 block text-gray-900 hover:bg-indigo-400 hover:text-white no-underline hover:no-underline">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- / Menu -->
+
+                </div>
+
+            </nav>
+        </div>
+
+        <!--Graph Content -->
+        <div id="main-content" class="w-full flex-1">
+
+            <div class="flex flex-1 flex-wrap">
+
+                <div class="w-full xl:w-2/3 p-6 xl:max-w-6xl">
+
+                    <!--"Container" for the graphs"-->
+                    <div class="max-w-full lg:max-w-3xl xl:max-w-5xl">
+
+                        <!--Table Card-->
+                        <div class="p-3">
+                            <div class="border-b p-3">
+                                <h5 class="font-bold text-black">DNS Config</h5>
+                            </div>
+                            <div class="p-5">
+
+                                <!-- Header -->
+                                <div class=" relative ">
+                                    <label for="name-with-label" class="text-gray-700">
+                                        Resolve
+                                    </label>
+                                </div>
+                                <!-- Header -->
+
+                                <div class="flex gap-4 mb-2">
+                                    <div class="relative">
+                                        <select class="block w-42 text-gray-700 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="animals">
+                                            <option value="dns" selected="selected">
+                                                A
+                                            </option>
+                                            <option value="http">
+                                                TXT
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" id="create-account-first-name" class="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="First name" placeholder="First name">
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" id="create-account-last-name" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="Last name" placeholder="Last name">
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 align-middle select-none mt-2">
+                                        <input type="checkbox" name="toggle" id="Green" class="checked:bg-green-500 outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                            <label for="Green" class="block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer">
+                                            </label>
+                                    </div>
+                                    <div  class="relative">
+                                        <button class="py-2 px-4 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">Login</button>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 mb-2">
+                                    <div class="relative">
+                                        <input type="text" id="create-account-first-name" class="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="First name" placeholder="First name">
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" id="create-account-last-name" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="Last name" placeholder="Last name">
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 mb-2">
+                                    <div class="relative">
+                                        <input disabled="disabled" type="text" id="create-account-first-name" class="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="First name" placeholder="First name">
+                                    </div>
+                                    <div class="relative">
+                                        <input disabled="disabled" type="text" id="create-account-last-name" class=" rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="Last name" placeholder="Last name">
+                                    </div>
+                                </div>
+                                <!-- button -->
+                                <div class="flex gap-4 mb-2">
+                                    <button class="py-2 px-4 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-48 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">Login</button>
+                                </div>
+                                <!-- button -->
+
+                                <!-- webhooks -->
+                                <div class="relative mt-8">
+                                    <label class="text-black" for="name">
+                                    Webhooks
+                                    </label>
+                                    <textarea disabled="disabled" class="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="comment" placeholder="Enter your comment" name="comment" rows="5" cols="40"></textarea>
+                                    <!-- button -->
+                                    <div class="flex gap-4 mb-2">
+                                        <button class="py-2 px-4 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-48 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">Login</button>
+                                    </div>
+                                    <!-- button -->
+                                </div>
+                                <!-- webhooks -->
+                            </div>
+                        </div>
+                        <!--/table Card-->
+
+                        <!--Table Card-->
+                        <div class="p-3">
+                            <div class="border-b p-3">
+                                <h5 class="font-bold text-black">HTTP Config</h5>
+                            </div>
+                            <div class="p-5">
+                                <div class="relative">
+                                    <label class="text-black" for="name">
+                                    Webhooks
+                                    </label>
+                                    <textarea class="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="comment" placeholder="Enter your comment" name="comment" rows="5" cols="40"></textarea>
+                                    <!-- button -->
+                                    <div class="flex gap-4 mb-2">
+                                        <button class="py-2 px-4 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-48 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">Login</button>
+                                    </div>
+                                    <!-- button -->
+                                </div>
+                            </div>
+                        </div>
+                         <!--/table Card-->
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+        /*Toggle dropdown list*/
+        /*https://gist.github.com/slavapas/593e8e50cf4cc16ac972afcbad4f70c8*/
+
+        var userMenuDiv = document.getElementById("userMenu");
+        var userMenu = document.getElementById("userButton");
+
+        document.onclick = check;
+
+        function check(e) {
+            var target = (e && e.target) || (event && event.srcElement);
+
+            //User Menu
+            if (!checkParent(target, userMenuDiv)) {
+                // click NOT on the menu
+                if (checkParent(target, userMenu)) {
+                    // click on the link
+                    if (userMenuDiv.classList.contains("invisible")) {
+                        userMenuDiv.classList.remove("invisible");
+                    } else {
+                        userMenuDiv.classList.add("invisible");
+                    }
+                } else {
+                    // click both outside link and outside menu, hide menu
+                    userMenuDiv.classList.add("invisible");
+                }
+            }
+
+        }
+
+        function checkParent(t, elm) {
+            while (t.parentNode) {
+                if (t == elm) {
+                    return true;
+                }
+                t = t.parentNode;
+            }
+            return false;
+        }
+    </script>
+
+</body>
+
+</html>
